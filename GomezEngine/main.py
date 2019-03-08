@@ -55,13 +55,16 @@ class DataStorage(object):
     def __init__(self, url, max_workers=10):
         try:
             remote_file = urllib.request.urlopen(url)
-        except Exception as e:
-            
-            
+        except urllib.request.HTTPError as e:
             raise ValueError("Can't connect. Reason " + 
-                             f"{e.reason:s}")
-        
-        tmp_db = json.loads(remote_file.read())
+                                f"{e.msg:s}")
+        except urllib.request.URLError as e:
+            raise ValueError("Can't connect. Reason " + 
+                                f"{e.reason:s}")        
+        try:
+            tmp_db = json.loads(remote_file.read())
+        except json.JSONDecodeError:
+            raise IOError("Remote json file appears dodgy")
         dates = [
             (k, dt.datetime.strptime(k, "%Y-%m-%d").date())
             for k in tmp_db.keys()
