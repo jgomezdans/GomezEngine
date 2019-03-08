@@ -13,7 +13,7 @@ import numpy as np
 from tqdm.autonotebook import tqdm
 
 
-import gdal
+from osgeo import gdal
 
 gdal.UseExceptions()
 
@@ -55,8 +55,12 @@ class DataStorage(object):
     def __init__(self, url, max_workers=10):
         try:
             remote_file = urllib.request.urlopen(url)
-        except urllib.request.HTTPError(f"{url:s} doesn't appear to exist"):
-            raise ValueError
+        except Exception as e:
+            
+            
+            raise ValueError("Can't connect. Reason " + 
+                             f"{e.reason:s}")
+        
         tmp_db = json.loads(remote_file.read())
         dates = [
             (k, dt.datetime.strptime(k, "%Y-%m-%d").date())
