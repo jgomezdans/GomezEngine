@@ -19,7 +19,7 @@ gdal.UseExceptions()
 
 
 
-def retrieve_field(k, url0, roi, urlcloud=None, cld_thresh=20):
+def retrieve_field(k, url0, roi=None, urlcloud=None, cld_thresh=20):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         if roi is not None:
@@ -100,15 +100,15 @@ class DataStorageSentinel2(DataStorage):
         for band in bands:
             band_loc = self.valid_bands.index(band)
             analysis_data = {}
-            with ThreadPoolExecutor(max_workers=self.max_workers) as ex:
-                futures = []
-                sel_dates = self.data_db.keys() if dates is None else dates
-                if type(sel_dates) != []: sel_dates = [sel_dates]
-                not_present = list((set(sel_dates).difference(
+            sel_dates = self.data_db.keys() if dates is None else dates
+            if type(sel_dates) != []: sel_dates = [sel_dates]
+            not_present = list((set(sel_dates).difference(
                     self.data_db.keys())))
                 
-                if len(not_present)  != 0:
+            if len(not_present)  != 0:
                     raise ValueError(f"{str(not_present):s} not present in DB!")
+            with ThreadPoolExecutor(max_workers=self.max_workers) as ex:
+                futures = []
                 for k in sel_dates:
                     if use_cloud_mask:
                         cld_file = [s for s in self.data_db[k] 
