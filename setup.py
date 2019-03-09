@@ -68,7 +68,7 @@ setup(
     classifiers=classifiers,
     install_requires=[
         "numpy",
-        "gdal",
+        "gdal>=2.3",
         "scipy",
         "pytest",
         "tqdm"

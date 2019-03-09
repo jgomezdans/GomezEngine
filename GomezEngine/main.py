@@ -93,17 +93,17 @@ class DataStorageSentinel2(DataStorage):
         
     def extract_band(self, bands, dates=None, roi=None, use_cloud_mask=True,
                             cld_thresh=20):
-        if type(bands) != []: bands = [bands]
+        if type(bands) != type([]): bands = [bands]
         assert all([band in self.valid_bands for band in bands])
         
         clean_data = {}
         for band in bands:
             band_loc = self.valid_bands.index(band)
             analysis_data = {}
-            sel_dates = self.data_db.keys() if dates is None else dates
-            if type(sel_dates) != []: sel_dates = [sel_dates]
-            not_present = list((set(sel_dates).difference(
-                    self.data_db.keys())))
+            sel_dates = list(self.data_db.keys()) if dates is None else dates
+            if type(sel_dates) != type([]): sel_dates = [sel_dates]
+            not_present = list((set(sel_dates).difference(set(
+                    self.data_db.keys()))))
                 
             if len(not_present)  != 0:
                     raise ValueError(f"{str(not_present):s} not present in DB!")

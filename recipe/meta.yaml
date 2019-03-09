@@ -1,0 +1,30 @@
+package:
+  name: gomezengine
+  version: 0.2
+  
+source:
+  git_tag: 0.2
+  git_url: http://github.com/jgomezdans/GomezEngine.git
+
+requirements:
+  build:
+    - python ==3.6
+    - setuptools
+    - numpy
+    - gdal >=2.3
+    - pytest
+
+  run:
+    - python ==3.6
+    - numpy
+    - gdal >=2.3
+    - pytest
+
+test:
+  imports:
+    - GomezEngine
+
+about:
+  home: http://github.com/jgomezdans/GomezEngine
+  license: GPLv3
+  summary: "The GomezEngine, a GEE rip-off."
