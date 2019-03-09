@@ -83,3 +83,15 @@ def test_DataStorageSentinel2_get_roi_non_empty_rastery():
                              "~ucfajlg/Colombia/aguadas.geojson")
     # The following doesn't pass for GDAL 2.4.0...
     assert retval["B04"][the_date].shape == (1251, 2197)
+
+
+def test_DataStorageSentinel2_get_roi_non_empty_rastery_2bands():
+    ds = DataStorageSentinel2("http://www2.geog.ucl.ac.uk/~ucfajlg/Colombia/" +
+                               "database.json")
+    #for the_date in list(ds.data_db.keys())[50:60]:
+    the_date = dt.datetime(2018, 7, 3).date()
+    retval = ds.extract_band(["B04", "B08"], dates=the_date,
+                             roi="http://www2.geog.ucl.ac.uk/" +
+                             "~ucfajlg/Colombia/aguadas.geojson")
+    # The following doesn't pass for GDAL 2.4.0...
+    assert retval["B04"][the_date].shape == (1251, 2197)
