@@ -8,16 +8,16 @@ source:
 
 requirements:
   build:
-    - python ==3.6
+    - python >=3.6
     - setuptools
     - numpy
-    - gdal >=2.3
+    - gdal >=2.1
     - pytest
 
   run:
-    - python ==3.6
+    - python >=3.6
     - numpy
-    - gdal >=2.3
+    - gdal >=2.1
     - pytest
 
 test:

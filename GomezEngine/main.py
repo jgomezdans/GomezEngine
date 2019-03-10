@@ -8,6 +8,8 @@ import datetime as dt
 
 import urllib.request
 
+from collections import defaultdict
+
 import numpy as np
 
 from tqdm.autonotebook import tqdm
@@ -19,7 +21,7 @@ gdal.UseExceptions()
 
 
 
-def retrieve_field(k, url0, roi=None, urlcloud=None, cld_thresh=20):
+def retrieve_field(k, band, url0, roi=None, urlcloud=None, cld_thresh=20):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         if roi is not None:
@@ -40,14 +42,14 @@ def retrieve_field(k, url0, roi=None, urlcloud=None, cld_thresh=20):
             cld = g.ReadAsArray()
             if np.sum(cld < cld_thresh) == 0:
                 # No clear pixels
-                return k, None        
+                return k, band, None        
         data1 = g1.ReadAsArray()*1.
         data1[data1 < -9990] = np.nan
         if urlcloud is not None:
             data1[cld > cld_thresh] = np.nan
         if np.isnan(np.nanmean(data1)):
-            return k, None
-        return k, data1
+            return k, band, None
+        return k, band, data1
 
 
 
@@ -96,39 +98,40 @@ class DataStorageSentinel2(DataStorage):
         if type(bands) != type([]): bands = [bands]
         assert all([band in self.valid_bands for band in bands])
         
-        clean_data = {}
-        for band in bands:
-            band_loc = self.valid_bands.index(band)
-            analysis_data = {}
-            sel_dates = list(self.data_db.keys()) if dates is None else dates
-            if type(sel_dates) != type([]): sel_dates = [sel_dates]
-            not_present = list((set(sel_dates).difference(set(
-                    self.data_db.keys()))))
-                
-            if len(not_present)  != 0:
-                    raise ValueError(f"{str(not_present):s} not present in DB!")
-            with ThreadPoolExecutor(max_workers=self.max_workers) as ex:
-                futures = []
+        analysis_data = defaultdict(dict)
+        sel_dates = list(self.data_db.keys()) if dates is None else dates
+        if type(sel_dates) != type([]): sel_dates = [sel_dates]
+        not_present = list((set(sel_dates).difference(set(
+                self.data_db.keys()))))
+            
+        if len(not_present)  != 0:
+                raise ValueError(f"{str(not_present):s} not present in DB!")
+        with ThreadPoolExecutor(max_workers=self.max_workers) as ex:
+            futures = []
+            for band in bands:
+                band_loc = self.valid_bands.index(band)
                 for k in sel_dates:
                     if use_cloud_mask:
                         cld_file = [s for s in self.data_db[k] 
-                                    if s.endswith("_CLD.vrt")][0]
+                                if s.endswith("_CLD.vrt")][0]
                     else:
                         cld_file = None
                     futures.append(ex.submit(retrieve_field, k,
-                                            self.data_db[k][band_loc],
-                                            roi, urlcloud=cld_file, 
-                                            cld_thresh=cld_thresh))
-                kwargs = {
-                    'total': len(futures),
-                    'unit': 'it',
-                    'unit_scale': True,
-                    'leave': True
-                }
-                #Print out the progress as tasks complete
-                for f in tqdm(as_completed(futures), **kwargs):
-                    f0, f1  = f.result()
-                    analysis_data[f0] = f1
-            clean_data[band] = {k:v for k,v in analysis_data.items() 
+                                             band, self.data_db[k][band_loc],
+                                             roi, urlcloud=cld_file, 
+                                             cld_thresh=cld_thresh))
+            kwargs = {
+                'total': len(futures),
+                'unit': 'it',
+                'unit_scale': True,
+                'leave': True
+            }
+            #Print out the progress as tasks complete
+            for f in tqdm(as_completed(futures), **kwargs):
+                f0, f1, f2  = f.result()
+                analysis_data[f0][f1] = f2
+        clean_data = {}
+        for band in bands:
+            clean_data[band] = {k:v for k,v in analysis_data[band].items() 
                                 if v is not None}
         return clean_data
