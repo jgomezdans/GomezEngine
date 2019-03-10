@@ -98,7 +98,6 @@ class DataStorageSentinel2(DataStorage):
         if type(bands) != type([]): bands = [bands]
         assert all([band in self.valid_bands for band in bands])
         
-        analysis_data = defaultdict(dict)
         sel_dates = list(self.data_db.keys()) if dates is None else dates
         if type(sel_dates) != type([]): sel_dates = [sel_dates]
         not_present = list((set(sel_dates).difference(set(
@@ -126,10 +125,11 @@ class DataStorageSentinel2(DataStorage):
                 'unit_scale': True,
                 'leave': True
             }
+            analysis_data = defaultdict(dict)
             #Print out the progress as tasks complete
             for f in tqdm(as_completed(futures), **kwargs):
                 f0, f1, f2  = f.result()
-                analysis_data[f0][f1] = f2
+                analysis_data[f1][f0] = f2
         clean_data = {}
         for band in bands:
             clean_data[band] = {k:v for k,v in analysis_data[band].items() 
