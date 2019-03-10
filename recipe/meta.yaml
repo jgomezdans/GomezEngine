@@ -11,13 +11,15 @@ requirements:
     - python >=3.6
     - setuptools
     - numpy
-    - gdal >=2.1
+    - tqdm
+    - gdal >=2.3
     - pytest
 
   run:
     - python >=3.6
     - numpy
-    - gdal >=2.1
+    - tqdm
+    - gdal >=2.3
     - pytest
 
 test:
