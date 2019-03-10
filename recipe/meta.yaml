@@ -1,9 +1,9 @@
 package:
   name: gomezengine
-  version: 0.2
+  version: 0.3
   
 source:
-  git_tag: 0.2
+  git_tag: 0.3
   git_url: http://github.com/jgomezdans/GomezEngine.git
 
 requirements:
