@@ -90,9 +90,9 @@ class DataStorageSentinel2(DataStorage):
             "B8A",
             "B11",
             "B12",
-            "CLD",
             "AOT",
             "TCWV",
+            "CLD",
         ]
 
 
@@ -120,7 +120,8 @@ class DataStorageSentinel2(DataStorage):
                         cld_file = [
                             s
                             for s in self.data_db[k]
-                            if s.endswith("_CLD.vrt")
+                            if (s.endswith("_CLD.vrt")
+                               or s.endswith("cloud.tif"))
                         ][0]
                     else:
                         cld_file = None
